@@ -52,7 +52,9 @@ class ViteRuby::Config
   # Public: Sets additional environment variables for vite-plugin-ruby.
   def to_env
     CONFIGURABLE_WITH_ENV.each_with_object({}) do |option, env|
-      unless (value = @config[option]).nil?
+      value = @config[option]
+      # empty string is not stored because VITE_RUBY_BASE is empty and bun will prepend the dev server with equal sign ("=").
+      if value && value != ''
         env["#{ ViteRuby::ENV_PREFIX }_#{ option.upcase }"] = value.to_s
       end
     end.merge(ViteRuby.env)
@@ -163,7 +165,7 @@ private
   DEFAULT_CONFIG = load_json("#{ __dir__ }/../../default.vite.json").freeze
 
   # Internal: Configuration options that can not be provided as env vars.
-  NOT_CONFIGURABLE_WITH_ENV = %w[additional_entrypoints watch_additional_paths].freeze
+  NOT_CONFIGURABLE_WITH_ENV = %w[additional_entrypoints watch_additional_paths runtime].freeze
 
   # Internal: Configuration options that can be provided as env vars.
   CONFIGURABLE_WITH_ENV = (DEFAULT_CONFIG.keys + %w[mode root] - NOT_CONFIGURABLE_WITH_ENV).freeze
